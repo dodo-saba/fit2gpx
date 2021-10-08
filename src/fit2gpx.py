@@ -1,4 +1,4 @@
-"""Some functions for parsing a FIT file and creating a Pandas DataFrame with the data.
+"""Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
 """
 import os
 import gzip
