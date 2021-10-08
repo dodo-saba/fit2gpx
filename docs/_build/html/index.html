@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>fit2gpx – convert .fit to .gpx &#8212; fit2gpx 0.0.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p><a class="reference external" href="https://www.python.org/"><img alt="made-with-python" src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg" /></a> <a class="reference external" href="https://travis-ci.org/joemccann/dillinger"><img alt="Build Status" src="https://travis-ci.org/joemccann/dillinger.svg?branch=master" /></a> <a class="reference external" href="http://ansicolortags.readthedocs.io/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/ansicolortags/badge/?version=latest" /></a> <a class="reference external" href="https://www.gnu.org/licenses/gpl-3.0"><img alt="GitHub license" src="https://img.shields.io/badge/License-GPLv3-blue.svg" /></a></p>
+<section id="fit2gpx-convert-fit-to-gpx">
+<h1>fit2gpx – convert .fit to .gpx<a class="headerlink" href="#fit2gpx-convert-fit-to-gpx" title="Permalink to this headline">¶</a></h1>
+<p>This is a simple Python library for converting .FIT files to .GPX files.
+It also includes tools to convert Strava data downloads in bulk to GPX.
+- <a class="reference external" href="https://developer.garmin.com/fit/overview/">FIT</a> is a GIS data
+file format used by Garmin GPS sport devices and Garmin software -
+<a class="reference external" href="https://docs.fileformat.com/gis/gpx/">GPX</a> is an XML based format
+for GPS tracks.</p>
+</section>
+<section id="when-use-cases">
+<h1>When: Use Cases<a class="headerlink" href="#when-use-cases" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic simple">
+<li><p>You need to convert .FIT files to pandas dataframe</p></li>
+<li><p>You need to convert .FIT files to .GPX</p></li>
+<li><p>You need to fix files dowloaded from Strava by converting the raw
+.FIT files to their .GPX counterparts</p></li>
+</ol>
+</section>
+<section id="why">
+<h1>Why<a class="headerlink" href="#why" title="Permalink to this headline">¶</a></h1>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+<p>I decided to create this package after spending a few hours searching
+for a simple solution to quickly convert hundreds of FIT files to GPX. I
+needed to do this as GIS applications do not parse FIT files. Whilst a
+few solutions existed, they are command line scripts which offered very
+little flexibility.</p>
+</section>
+<section id="relevance-to-strava">
+<h2>Relevance to Strava<a class="headerlink" href="#relevance-to-strava" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Pre-GPDR, you could bulk export all your Strava activities as GPX
+files.</p></li>
+<li><p>Post-GDPR, you can export an archive of your account. Whilst this
+includes much more data, activity GPS files are now downloaded in
+their original file format (eg. GPX or FIT format, some gzipped, some
+not) and named like 2500155647.gpx, 2500155647.gpx.gz,
+2500155647.fit, and 2500155647.fit.gz.</p></li>
+<li><p><a class="reference external" href="https://support.strava.com/hc/en-us/articles/216918437-Exporting-your-Data-and-Bulk-Export#Bulk">How to bulk export you Strava
+Data</a></p></li>
+</ul>
+</section>
+</section>
+<section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The fit2gpx module provides two converter classes: - Converter: used to
+convert a single or multiple FIT files to pandas dataframes or GPX files
+- StravaConverter: used to fix all the Strava Bulk Export problems in
+three steps: 1. Unzip GPX and FIT files 2. Add activity metadata to
+existing GPX files 3. Convert FIT files to GPX including activity
+metadata from Strava)</p>
+</section>
+<section id="use-case-1-fit-to-pd-dataframe">
+<h1>Use Case 1: FIT to pd.DataFrame<a class="headerlink" href="#use-case-1-fit-to-pd-dataframe" title="Permalink to this headline">¶</a></h1>
+<p>Step 1: Import module and create converter object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fit2gpx</span> <span class="kn">import</span> <span class="n">Converter</span>
+
+<span class="n">conv</span> <span class="o">=</span> <span class="n">Converter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Step 2: Convert FIT file to 2 pd.DataFrame: fit_to_dataframes()</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_lap</span><span class="p">,</span> <span class="n">df_point</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">fit_to_dataframes</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="s1">&#39;3323369944.fit&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>df_points: information per track point: longitude, latitude,
+altitude, timestamp, heart rate, cadence, speed</p></li>
+<li><p>df_laps: information per lap: lap number, start time, total
+distance, total elapsed time, max speed, max heart rate, average
+heart rate</p></li>
+</ul>
+</section>
+<section id="use-case-2-fit-to-gpx">
+<h1>Use Case 2: FIT to GPX<a class="headerlink" href="#use-case-2-fit-to-gpx" title="Permalink to this headline">¶</a></h1>
+<p>Import module and create converter object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fit2gpx</span> <span class="kn">import</span> <span class="n">Converter</span>
+
+<span class="n">conv</span> <span class="o">=</span> <span class="n">Converter</span><span class="p">()</span>          <span class="c1"># create standard converter object</span>
+</pre></div>
+</div>
+<p>Use case 2.1: convert a single fit file: fit_to_gpx()</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gpx</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">fit_to_gpx</span><span class="p">(</span><span class="n">f_in</span><span class="o">=</span><span class="s1">&#39;3323369944.fit&#39;</span><span class="p">,</span> <span class="n">f_out</span><span class="o">=</span><span class="s1">&#39;3323369944.fit&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use case 2.2: convert many fit files to gpx files: fit_to_gpx_bulk()</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conv</span><span class="o">.</span><span class="n">fit_to_gpx_bulk</span><span class="p">(</span><span class="n">dir_in</span><span class="o">=</span><span class="s1">&#39;./project/activities/&#39;</span><span class="p">,</span> <span class="n">dir_out</span><span class="o">=</span><span class="s1">&#39;./project/activities_convert/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="use-case-3-strava-bulk-export-tools-fit-to-gpx-conversion">
+<h1>Use Case 3: Strava Bulk Export Tools (FIT to GPX conversion)<a class="headerlink" href="#use-case-3-strava-bulk-export-tools-fit-to-gpx-conversion" title="Permalink to this headline">¶</a></h1>
+<p>Copy the below code, adjusting the input directory (DIR_STRAVA), to fix
+the Strava Bulk Export problems discussed in the
+<a class="reference external" href="#Overview">overview</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fit2gpx</span> <span class="kn">import</span> <span class="n">StravaConverter</span>
+
+<span class="n">DIR_STRAVA</span> <span class="o">=</span> <span class="s1">&#39;C:/Users/dorian-saba/Documents/Strava/&#39;</span>
+
+<span class="c1"># Step 1: Create StravaConverter object</span>
+<span class="c1"># - Note: the dir_in must be the path to the central unzipped Strava bulk export folder</span>
+<span class="c1"># - Note: You can specify the dir_out if you wish. By default it is set to &#39;activities_gpx&#39;, which will be created in main Strava folder specified.</span>
+
+<span class="n">strava_conv</span> <span class="o">=</span> <span class="n">StravaConverter</span><span class="p">(</span>
+    <span class="n">dir_in</span><span class="o">=</span><span class="n">DIR_STRAVA</span>
+<span class="p">)</span>
+
+<span class="c1"># Step 2: Unzip the zipped files</span>
+<span class="n">strava_conv</span><span class="o">.</span><span class="n">unzip_activities</span><span class="p">()</span>
+
+<span class="c1"># Step 3: Add metadata to existing GPX files</span>
+<span class="n">strava_conv</span><span class="o">.</span><span class="n">add_metadata_to_gpx</span><span class="p">()</span>
+
+<span class="c1"># Step 4: Convert FIT to GPX</span>
+<span class="n">strava_conv</span><span class="o">.</span><span class="n">strava_fit_to_gpx</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="dependencies">
+<h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+<section id="pandas">
+<h2>pandas<a class="headerlink" href="#pandas" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/pandas-dev/pandas">pandas</a> is a Python package
+that provides fast, flexible, and expressive data structures designed to
+make working with “relational” or “labeled” data both easy and
+intuitive. #### gpxpy <a class="reference external" href="https://github.com/tkrajina/gpxpy">gpxpy</a> is a
+simple Python library for parsing and manipulating GPX files. It can
+parse and generate GPX 1.0 and 1.1 files. The generated file will always
+be a valid XML document, but it may not be (strictly speaking) a valid
+GPX document. #### fitdecode
+<a class="reference external" href="https://github.com/polyvertex/fitdecode">fitdecode</a> is a rewrite of
+the <a class="reference external" href="https://github.com/dtcooper/python-fitparse">fitparse</a> module
+allowing to parse ANT/GARMIN FIT files.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">fit2gpx</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, dodo-saba.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
