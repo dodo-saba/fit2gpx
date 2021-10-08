@@ -1,5 +1,4 @@
-|made-with-python| |Build Status| |Documentation Status| |GitHub
-license|
+|made-with-python| |Documentation Status| |GitHub license|
 
 fit2gpx -- convert .fit to .gpx
 ===============================
@@ -150,9 +149,7 @@ allowing to parse ANT/GARMIN FIT files.
 
 .. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
    :target: https://www.python.org/
-.. |Build Status| image:: https://travis-ci.org/joemccann/dillinger.svg?branch=master
-   :target: https://travis-ci.org/joemccann/dillinger
-.. |Documentation Status| image:: https://readthedocs.org/projects/ansicolortags/badge/?version=latest
-   :target: http://ansicolortags.readthedocs.io/?badge=latest
+.. |Documentation Status| image:: https://readthedocs.org/projects/fit2gpx/badge/?version=latest
+   :target: https://fit2gpx.readthedocs.io/en/latest/?badge=latest
 .. |GitHub license| image:: https://img.shields.io/badge/License-GPLv3-blue.svg
    :target: https://www.gnu.org/licenses/gpl-3.0
