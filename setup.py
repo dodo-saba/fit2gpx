@@ -5,9 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="fit2gpx",                         # Package Name
-    version="0.0.1",                        # Version - Initial release
+    version="0.0.6",                        # Version - Initial release - README Updated
     author="Dorian Sabathier",              # Full name of the author
     author_email="dorian.sabathier+PyPi@gmail.com",
+    url='https://github.com/dodo-saba/fit2gpx',
     license='GNU AGPLv3',                   # License
 
     description="Package to convert .FIT files to .GPX files, including tools for .FIT files downloaded from Strava",
@@ -28,7 +29,7 @@ setuptools.setup(
     ],
     python_requires='>=3.6',                # Minimum version requirement of the package
     py_modules=["fit2gpx"],                 # Name of the python package
-    package_dir={'': 'fit2gpx/src'},        # Directory of the source code of the package
+    package_dir={'': 'src'},        # Directory of the source code of the package
 
 
     classifiers=[                           # Information to filter the project on PyPi website
