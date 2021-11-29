@@ -51,7 +51,7 @@ conv = Converter()          # create standard converter object
 ```
 Use case 2.1: convert a single fit file: fit_to_gpx()
 ```python
-gpx = conv.fit_to_gpx(f_in='3323369944.fit', f_out='3323369944.fit')
+gpx = conv.fit_to_gpx(f_in='3323369944.fit', f_out='3323369944.gpx')
 ```
 
 Use case 2.2: convert many fit files to gpx files: fit_to_gpx_bulk()
