@@ -272,7 +272,8 @@ class StravaConverter(Converter):
             dir_out += '/'
 
         # If no output directory provided, set to default:
-        dir_out = dir_in + 'activities_gpx/'
+        if not dir_out:
+            dir_out = dir_in + 'activities_gpx/'
 
         # Check input directory has an activities folder and an activities.csv files
         if 'activities.csv' not in os.listdir(dir_in) or not os.path.isdir(dir_in + 'activities'):
