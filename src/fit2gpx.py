@@ -325,7 +325,7 @@ class StravaConverter(Converter):
         """
 
         # Step 2: Read the activities metadata:
-        df_acts = pd.read_csv(self._dir_in + '/activities.csv')
+        df_acts = pd.read_csv(self._dir_in + '/activities.csv').fillna('')
 
         # Step 3: Iterate through all files in indicated directory:
 
@@ -387,7 +387,7 @@ class StravaConverter(Converter):
         gpx_files = [f for f in os.listdir(self._dir_activities) if '.gpx' in f and f not in os.listdir(self._dir_out)]
 
         # Step 1: Read the activities metadata:
-        df_acts = pd.read_csv(self._dir_in + '/activities.csv')
+        df_acts = pd.read_csv(self._dir_in + '/activities.csv').fillna('')
 
         # Step 2: Iterate through gpx files
         for gpx_path in gpx_files:
