@@ -6,9 +6,9 @@ This is a simple Python library for converting .FIT files to .GPX files. It also
 - [GPX](https://docs.fileformat.com/gis/gpx/) is an XML based format for GPS tracks.
 
 # When: Use Cases
-1. You need to convert .FIT files to pandas dataframe 
+1. You need to convert .FIT files to pandas dataframe (e.g. for data analysis)
 2. You need to convert .FIT files to .GPX
-3. You need to fix files dowloaded from Strava by converting the raw .FIT files to their .GPX counterparts
+3. You need to fix files downloaded from Strava by converting the raw .FIT files to their .GPX counterparts
 
 # Why
 #### Motivation
@@ -38,8 +38,9 @@ Step 2: Convert FIT file to 2 pd.DataFrame: fit_to_dataframes()
 ```python
 df_lap, df_point = conv.fit_to_dataframes(fname='3323369944.fit')
 ```
-- df_points: information per track point: longitude, latitude, altitude, timestamp, heart rate, cadence, speed
 - df_laps: information per lap: lap number, start time, total distance, total elapsed time, max speed, max heart rate, average heart rate
+- df_points: information per track point: longitude, latitude, altitude, timestamp, heart rate, cadence, speed, power, temperature
+  - Note the 'enhanced_speed' and 'enhanced_altitude' are also extracted. Where overlap exists with their default counterparts, values are identical. However, the default or enhanced speed/altitude fields may be empty  depending on the device used to record ([detailed information](https://pkg.go.dev/github.com/tormoder/fit#RecordMsg)).
 
     
 # Use Case 2: FIT to GPX
@@ -49,12 +50,12 @@ from fit2gpx import Converter
 
 conv = Converter()          # create standard converter object
 ```
-Use case 2.1: convert a single fit file: fit_to_gpx()
+Use case 2.1: convert a single FIT file: fit_to_gpx()
 ```python
 gpx = conv.fit_to_gpx(f_in='3323369944.fit', f_out='3323369944.gpx')
 ```
 
-Use case 2.2: convert many fit files to gpx files: fit_to_gpx_bulk()
+Use case 2.2: convert many FIT files to GPX files: fit_to_gpx_bulk()
 ```python
 conv.fit_to_gpx_bulk(dir_in='./project/activities/', dir_out='./project/activities_convert/')
 ```
