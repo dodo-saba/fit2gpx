@@ -31,7 +31,8 @@ class Converter:
             'timestamp',
             'heart_rate',
             'cadence',
-            'speed'
+            'speed',
+            'power'
         ]
 
         self._colnames_laps = [
