@@ -21,18 +21,21 @@ class Converter:
             such as number of files converted.
         """
         self.status_msg = status_msg
-        # The names of the columns we will use in our points and laps DataFrame
+        # The names of the columns will be used in our points and laps DataFrame
         # (use the same name as the field names in FIT file to facilate parsing)
         self._colnames_points = [
             'latitude',
             'longitude',
             'lap',
-            'altitude',
             'timestamp',
+            'altitude',
+            'enhanced_altitude',
+            'temperature',
             'heart_rate',
             'cadence',
             'speed',
-            'power'
+            'enhanced_speed',
+            'power',
         ]
 
         self._colnames_laps = [
@@ -203,7 +206,13 @@ class Converter:
         # Step 1: Convert FIT to pd.DataFrame
         df_laps, df_points = self.fit_to_dataframes(f_in)
 
-        # Step 2: Convert pd.DataFrame to GPX
+        # Step 2: Fill gaps in data if FIT file recorded data only in enhanced altitude/speed columns:
+        enhanced_fields = ['altitude', 'speed']
+        for field in enhanced_fields:
+            if df_points[field].count() == 0 and df_points[f'enhanced_{field}'].count() > 0:
+                df_points[field].fillna(df_points[f'enhanced_{field}'], inplace=True)
+
+        # Step 3: Convert pd.DataFrame to GPX
         gpx = self.dataframe_to_gpx(
             df_points=df_points,
             col_lat='latitude',
