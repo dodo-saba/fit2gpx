@@ -1,5 +1,8 @@
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Documentation Status](https://readthedocs.org/projects/fit2gpx/badge/?version=latest)](https://fit2gpx.readthedocs.io/en/latest/?badge=latest) [![GitHub license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
+<a href="https://www.buymeacoffee.com/doriansaba" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/guidelines/download-assets-sm-3.svg" alt="Buy Me A Coffee" style="height: 60px" ></a>
+
+
 # fit2gpx -- convert .fit to .gpx
 This is a simple Python library for converting .FIT files to .GPX files. It also includes tools to convert Strava data downloads in bulk to GPX.
 - [FIT](https://developer.garmin.com/fit/overview/) is a GIS data file format used by Garmin GPS sport devices and Garmin software
