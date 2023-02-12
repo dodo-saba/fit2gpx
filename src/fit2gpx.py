@@ -1,13 +1,14 @@
 """Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
 """
-import os
 import gzip
+import os
 import shutil
 from datetime import datetime, timedelta
-from typing import Dict, Union, Optional, Tuple
-import pandas as pd
-import gpxpy.gpx
+from typing import Dict, Optional, Tuple, Union
+
 import fitdecode
+import gpxpy.gpx
+import pandas as pd
 
 
 # MAIN CONVERTER CLASS
