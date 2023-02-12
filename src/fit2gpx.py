@@ -100,10 +100,11 @@ class Converter:
         Returns:
             dfs (tuple): df containing data about the laps , df containing data about the individual points.
         """
-        # Check that this is a .FIT file
-        input_extension = os.path.splitext(fname)[1]
-        if input_extension.lower() != '.fit':
-            raise fitdecode.exceptions.FitHeaderError("Input file must be a .FIT file.")
+        if isinstance(fname, str) or hasattr(fname, '__fspath__'):
+            # Check that this is a .FIT file
+            input_extension = os.path.splitext(fname)[1]
+            if input_extension.lower() != '.fit':
+                raise fitdecode.exceptions.FitHeaderError("Input file must be a .FIT file.")
 
         data_points = []
         data_laps = []
@@ -460,7 +461,7 @@ def cli():
     )
     parser.add_argument(
         'outfile',
-        type=argparse.FileType('wb'),
+        type=argparse.FileType('wt'),
         help='path to the output .GPX file; '
         "use '-' to write the file to standard output"
     )
