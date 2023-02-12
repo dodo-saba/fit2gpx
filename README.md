@@ -95,3 +95,31 @@ strava_conv.strava_fit_to_gpx()
 [gpxpy](https://github.com/tkrajina/gpxpy) is a simple Python library for parsing and manipulating GPX files. It can parse and generate GPX 1.0 and 1.1 files. The generated file will always be a valid XML document, but it may not be (strictly speaking) a valid GPX document.
 #### fitdecode
 [fitdecode](https://github.com/polyvertex/fitdecode) is a rewrite of the [fitparse](https://github.com/dtcooper/python-fitparse) module allowing to parse ANT/GARMIN FIT files.
+
+# Command line interface
+
+You can install this package using pip:
+
+```shell
+pip install --user --upgrade .
+```
+
+And then you can run the `fit2gpx` command to convert a FIT file to GPX:
+
+```shell
+fit2gpx 3323369944.fit 3323369944.gpx
+```
+
+You can also read the FIT file from standard input and/or write the GPX file to
+standard output:
+
+```shell
+fit2gpx - 3323369944.gpx < 3323369944.fit
+fit2gpx 3323369944.fit - > 3323369944.gpx
+```
+
+To see the help, run:
+
+```shell
+fit2gpx -h
+```
