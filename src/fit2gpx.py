@@ -1,5 +1,6 @@
 """Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
 """
+import argparse
 import gzip
 import os
 import shutil
@@ -444,3 +445,26 @@ class StravaConverter(Converter):
             # Step 2.4: Print
             if self.status_msg:
                 print(f'{len(gpx_files)} .gpx files have had Strava metadata added.')
+
+
+def cli():
+    parser = argparse.ArgumentParser(
+        prog='fit2gpx',
+        description="Convert a .FIT file to .GPX."
+    )
+    parser.add_argument(
+        'infile',
+        type=argparse.FileType('rb'),
+        help='path to the input .FIT file; '
+        "use '-' to read the file from standard input"
+    )
+    parser.add_argument(
+        'outfile',
+        type=argparse.FileType('wb'),
+        help='path to the output .GPX file; '
+        "use '-' to write the file to standard output"
+    )
+    args = parser.parse_args()
+
+    conv = Converter()
+    conv.fit_to_gpx(f_in=args.infile, f_out=args.outfile)
