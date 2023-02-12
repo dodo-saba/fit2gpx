@@ -195,14 +195,16 @@ class Converter:
             f_in (str): file path to FIT activity
             f_out (str): file path to save the converted FIT file
         """
-        # Step 0: Validate inputs
-        input_extension = os.path.splitext(f_in)[1]
-        if input_extension != '.fit':
-            raise Exception("Input file must be a .FIT file.")
+        if isinstance(f_in, str) or hasattr(f_in, '__fspath__'):
+            # Step 0: Validate inputs
+            input_extension = os.path.splitext(f_in)[1]
+            if input_extension != '.fit':
+                raise Exception("Input file must be a .FIT file.")
 
-        output_extension = os.path.splitext(f_out)[1]
-        if output_extension != ".gpx":
-            raise TypeError(f"Output file must be a .gpx file.")
+        if isinstance(f_out, str) or hasattr(f_out, '__fspath__'):
+            output_extension = os.path.splitext(f_out)[1]
+            if output_extension != ".gpx":
+                raise TypeError(f"Output file must be a .gpx file.")
 
         # Step 1: Convert FIT to pd.DataFrame
         df_laps, df_points = self.fit_to_dataframes(f_in)
@@ -223,8 +225,12 @@ class Converter:
         )
 
         # Step 3: Save file
-        with open(f_out, 'w') as f:
-            f.write(gpx.to_xml())
+        xml = gpx.to_xml()
+        if hasattr(f_out, 'write'):
+            f_out.write(xml)
+        else:
+            with open(f_out, 'w') as f:
+                f.write(xml)
 
         return gpx
 
