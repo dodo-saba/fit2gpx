@@ -423,6 +423,10 @@ class StravaConverter(Converter):
             f_gpx = open(self._dir_activities + gpx_path, 'r', encoding='utf-8')
             gpx = gpxpy.parse(f_gpx)
 
+            # If there are no tracks then do not create this file
+            if len(gpx.tracks) == 0:
+               continue
+
             # -- assign GPX track metadata
             gpx.tracks[0].name = act_name
             gpx.tracks[0].type = md['Activity Type']
