@@ -8,6 +8,7 @@ from typing import Dict, Union, Optional, Tuple
 import pandas as pd
 import gpxpy.gpx
 import fitdecode
+from math import isnan
 
 
 # MAIN CONVERTER CLASS
@@ -175,6 +176,8 @@ class Converter:
 
         # Step 3: Add points from dataframe to GPX track:
         for idx in df_points.index:
+            if isnan(df_points.loc[idx, col_alt]):
+                df_points.loc[idx, col_alt] = 0
             # Create trackpoint:
             track_point = gpxpy.gpx.GPXTrackPoint(
                 latitude=df_points.loc[idx, col_lat],
