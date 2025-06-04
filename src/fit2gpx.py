@@ -1,14 +1,18 @@
 """Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
 """
-import os
+import argparse
 import gzip
+import os
 import shutil
 from datetime import datetime, timedelta
-from typing import Dict, Union, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
+
 import pandas as pd
-import gpxpy.gpx
-import fitdecode
 from math import isnan
+import lxml.etree as mod_etree
+
+import fitdecode
+import gpxpy.gpx
 
 
 # MAIN CONVERTER CLASS
@@ -99,10 +103,11 @@ class Converter:
         Returns:
             dfs (tuple): df containing data about the laps , df containing data about the individual points.
         """
-        # Check that this is a .FIT file
-        input_extension = os.path.splitext(fname)[1]
-        if input_extension.lower() != '.fit':
-            raise fitdecode.exceptions.FitHeaderError("Input file must be a .FIT file.")
+        if isinstance(fname, str) or hasattr(fname, '__fspath__'):
+            # Check that this is a .FIT file
+            input_extension = os.path.splitext(fname)[1]
+            if input_extension.lower() != '.fit':
+                raise fitdecode.exceptions.FitHeaderError("Input file must be a .FIT file.")
 
         data_points = []
         data_laps = []
@@ -134,7 +139,7 @@ class Converter:
 
     # Method adapted from: https://github.com/nidhaloff/gpx-converter/blob/master/gpx_converter/base.py
     def dataframe_to_gpx(self, df_points, col_lat='latitude', col_long='longitude', col_time=None, col_alt=None,
-                         gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
+                         col_hr=None, col_cad=None, gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
         """
         Convert a pandas dataframe to gpx
         Parameters:
@@ -143,6 +148,8 @@ class Converter:
             col_time (str): name of the time column
             col_long (str): name of the longitudes column
             col_lat (str): name of the latitudes column
+            col_hr (str): name of the heart rate column
+            col_cad (str): name of the cadence column
             gpx_name (str): name for the gpx track (note is not the same as the file name)
             gpx_desc (str): description for the gpx track
             gpx_type : activity type for the gpx track (can be str, or int)
@@ -168,6 +175,10 @@ class Converter:
         gpx_segment = gpxpy.gpx.GPXTrackSegment()
         gpx_track.segments.append(gpx_segment)
 
+        # add extension to be able to add heartrate and cadence
+        if col_hr or col_cad:
+            gpx.nsmap = {'gpxtpx': 'http://www.garmin.com/xmlschemas/TrackPointExtension/v1'}
+        
         # Step 2: Assign GPX track metadata
         gpx.tracks[0].name = gpx_name
         gpx.tracks[0].type = gpx_type
@@ -192,6 +203,19 @@ class Converter:
                     elevation=df_points.loc[idx, col_alt] if col_alt else None,
                 )
 
+            # add GPX extensions for heartrate and cadence
+            if col_hr or col_cad:
+                namespace = '{gpxtpx}'
+                root = mod_etree.Element(f'{namespace}TrackPointExtension')
+                if col_hr:
+                    sub_hr = mod_etree.SubElement(root, f'{namespace}hr')
+                    sub_hr.text = str(df_points.loc[idx, col_hr]) if col_hr else '0'
+                
+                if col_cad:
+                    sub_cad = mod_etree.SubElement(root, f'{namespace}cad')
+                    sub_cad.text = str(df_points.loc[idx, col_cad]) if col_cad else '0'
+                track_point.extensions.append(root)
+
             # Append GPX_TrackPoint to segment:
             gpx_segment.points.append(track_point)
 
@@ -203,14 +227,16 @@ class Converter:
             f_in (str): file path to FIT activity
             f_out (str): file path to save the converted FIT file
         """
-        # Step 0: Validate inputs
-        input_extension = os.path.splitext(f_in)[1]
-        if input_extension != '.fit':
-            raise Exception("Input file must be a .FIT file.")
+        if isinstance(f_in, str) or hasattr(f_in, '__fspath__'):
+            # Step 0: Validate inputs
+            input_extension = os.path.splitext(f_in)[1]
+            if input_extension != '.fit':
+                raise Exception("Input file must be a .FIT file.")
 
-        output_extension = os.path.splitext(f_out)[1]
-        if output_extension != ".gpx":
-            raise TypeError(f"Output file must be a .gpx file.")
+        if isinstance(f_out, str) or hasattr(f_out, '__fspath__'):
+            output_extension = os.path.splitext(f_out)[1]
+            if output_extension != ".gpx":
+                raise TypeError(f"Output file must be a .gpx file.")
 
         # Step 1: Convert FIT to pd.DataFrame
         df_laps, df_points = self.fit_to_dataframes(f_in)
@@ -219,7 +245,7 @@ class Converter:
         enhanced_fields = ['altitude', 'speed']
         for field in enhanced_fields:
             if df_points[field].count() == 0 and df_points[f'enhanced_{field}'].count() > 0:
-                df_points[field].fillna(df_points[f'enhanced_{field}'], inplace=True)
+                df_points[field] = df_points[field].fillna(df_points[f'enhanced_{field}'])
 
         # Step 3: Convert pd.DataFrame to GPX
         gpx = self.dataframe_to_gpx(
@@ -228,11 +254,17 @@ class Converter:
             col_long='longitude',
             col_time='timestamp',
             col_alt='altitude',
+            col_hr='heart_rate',
+            col_cad='cadence',
         )
 
         # Step 3: Save file
-        with open(f_out, 'w') as f:
-            f.write(gpx.to_xml())
+        xml = gpx.to_xml()
+        if hasattr(f_out, 'write'):
+            f_out.write(xml)
+        else:
+            with open(f_out, 'w') as f:
+                f.write(xml)
 
         return gpx
 
@@ -387,6 +419,8 @@ class StravaConverter(Converter):
                 col_long='longitude',
                 col_time='timestamp',
                 col_alt='altitude',
+                col_hr='heart_rate',
+                col_cad='cadence',
                 **strava_args
             )
 
@@ -432,6 +466,10 @@ class StravaConverter(Converter):
             f_gpx = open(self._dir_activities + gpx_path, 'r', encoding='utf-8')
             gpx = gpxpy.parse(f_gpx)
 
+            # Skip any file that does not have tracks (i.e. no geospatial data, e.g. workouts or pool swims)
+            if len(gpx.tracks) == 0:
+               continue
+
             # -- assign GPX track metadata
             gpx.tracks[0].name = act_name
             gpx.tracks[0].type = md['Activity Type']
@@ -446,3 +484,26 @@ class StravaConverter(Converter):
             # Step 2.4: Print
             if self.status_msg:
                 print(f'{len(gpx_files)} .gpx files have had Strava metadata added.')
+
+
+def cli():
+    parser = argparse.ArgumentParser(
+        prog='fit2gpx',
+        description="Convert a .FIT file to .GPX."
+    )
+    parser.add_argument(
+        'infile',
+        type=argparse.FileType('rb'),
+        help='path to the input .FIT file; '
+        "use '-' to read the file from standard input"
+    )
+    parser.add_argument(
+        'outfile',
+        type=argparse.FileType('wt'),
+        help='path to the output .GPX file; '
+        "use '-' to write the file to standard output"
+    )
+    args = parser.parse_args()
+
+    conv = Converter()
+    conv.fit_to_gpx(f_in=args.infile, f_out=args.outfile)
