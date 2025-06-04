@@ -102,6 +102,12 @@ And then you can run the `fit2gpx` command to convert a FIT file to GPX:
 fit2gpx 3323369944.fit 3323369944.gpx
 ```
 
+Or convert a Strava export directory to a directory of GPX files:
+
+```shell
+fit2gpx export_23749537 export_23749537_gpx
+```
+
 You can also read the FIT file from standard input and/or write the GPX file to
 standard output:
 

@@ -4,6 +4,7 @@ import argparse
 import gzip
 import os
 import shutil
+import sys
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple, Union
 
@@ -493,17 +494,24 @@ def cli():
     )
     parser.add_argument(
         'infile',
-        type=argparse.FileType('rb'),
-        help='path to the input .FIT file; '
-        "use '-' to read the file from standard input"
+        help='path to the input .FIT file or Strava export directory; '
+        "use '-' to read the file from standard input",
     )
     parser.add_argument(
         'outfile',
-        type=argparse.FileType('wt'),
-        help='path to the output .GPX file; '
-        "use '-' to write the file to standard output"
+        help='path to the output .GPX file or directory; '
+        "use '-' to write the file to standard output",
     )
     args = parser.parse_args()
 
-    conv = Converter()
-    conv.fit_to_gpx(f_in=args.infile, f_out=args.outfile)
+    if os.path.isdir(args.infile):
+        strava_conv = StravaConverter(args.infile, args.outfile)
+        strava_conv.unzip_activities()
+        strava_conv.add_metadata_to_gpx()
+        strava_conv.strava_fit_to_gpx()
+    else:
+        conv = Converter()
+        conv.fit_to_gpx(
+            f_in=sys.stdin.buffer if args.infile == '-' else args.infile,
+            f_out=sys.stdout if args.outfile == '-' else args.outfile,
+        )
