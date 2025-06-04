@@ -88,14 +88,6 @@ strava_conv.add_metadata_to_gpx()
 strava_conv.strava_fit_to_gpx()
 ```
 
-# Dependencies
-#### pandas
-[pandas](https://github.com/pandas-dev/pandas) is a Python package that provides fast, flexible, and expressive data structures designed to make working with "relational" or "labeled" data both easy and intuitive.
-#### gpxpy
-[gpxpy](https://github.com/tkrajina/gpxpy) is a simple Python library for parsing and manipulating GPX files. It can parse and generate GPX 1.0 and 1.1 files. The generated file will always be a valid XML document, but it may not be (strictly speaking) a valid GPX document.
-#### fitdecode
-[fitdecode](https://github.com/polyvertex/fitdecode) is a rewrite of the [fitparse](https://github.com/dtcooper/python-fitparse) module allowing to parse ANT/GARMIN FIT files.
-
 # Command line interface
 
 You can install this package using pip:
@@ -123,3 +115,13 @@ To see the help, run:
 ```shell
 fit2gpx -h
 ```
+
+# Dependencies
+#### pandas
+[pandas](https://github.com/pandas-dev/pandas) is a Python package that provides fast, flexible, and expressive data structures designed to make working with "relational" or "labeled" data both easy and intuitive.
+#### gpxpy
+[gpxpy](https://github.com/tkrajina/gpxpy) is a simple Python library for parsing and manipulating GPX files. It can parse and generate GPX 1.0 and 1.1 files. The generated file will always be a valid XML document, but it may not be (strictly speaking) a valid GPX document.
+#### fitdecode
+[fitdecode](https://github.com/polyvertex/fitdecode) is a rewrite of the [fitparse](https://github.com/dtcooper/python-fitparse) module allowing to parse ANT/GARMIN FIT files.
+
+
