@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple, Union
 
 import fitdecode
+import lxml.etree as mod_etree
 import gpxpy.gpx
 import pandas as pd
 
@@ -136,7 +137,7 @@ class Converter:
 
     # Method adapted from: https://github.com/nidhaloff/gpx-converter/blob/master/gpx_converter/base.py
     def dataframe_to_gpx(self, df_points, col_lat='latitude', col_long='longitude', col_time=None, col_alt=None,
-                         gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
+                         col_hr=None, col_cad=None, gpx_name=None, gpx_desc=None, gpx_link=None, gpx_type=None):
         """
         Convert a pandas dataframe to gpx
         Parameters:
@@ -145,6 +146,8 @@ class Converter:
             col_time (str): name of the time column
             col_long (str): name of the longitudes column
             col_lat (str): name of the latitudes column
+            col_hr (str): name of the heart rate column
+            col_cad (str): name of the cadence column
             gpx_name (str): name for the gpx track (note is not the same as the file name)
             gpx_desc (str): description for the gpx track
             gpx_type : activity type for the gpx track (can be str, or int)
@@ -170,6 +173,10 @@ class Converter:
         gpx_segment = gpxpy.gpx.GPXTrackSegment()
         gpx_track.segments.append(gpx_segment)
 
+        # add extension to be able to add heartrate and cadence
+        if col_hr or col_cad:
+            gpx.nsmap = {'gpxtpx': 'http://www.garmin.com/xmlschemas/TrackPointExtension/v1'}
+        
         # Step 2: Assign GPX track metadata
         gpx.tracks[0].name = gpx_name
         gpx.tracks[0].type = gpx_type
@@ -185,6 +192,19 @@ class Converter:
                 time=pd.Timestamp(df_points.loc[idx, col_time]) if col_time else None,
                 elevation=df_points.loc[idx, col_alt] if col_alt else None
             )
+
+            # add GPX extensions for heartrate and cadence
+            if col_hr or col_cad:
+                namespace = '{gpxtpx}'
+                root = mod_etree.Element(f'{namespace}TrackPointExtension')
+                if col_hr:
+                    sub_hr = mod_etree.SubElement(root, f'{namespace}hr')
+                    sub_hr.text = str(df_points.loc[idx, col_hr]) if col_hr else '0'
+                
+                if col_cad:
+                    sub_cad = mod_etree.SubElement(root, f'{namespace}cad')
+                    sub_cad.text = str(df_points.loc[idx, col_cad]) if col_cad else '0'
+                track_point.extensions.append(root)
 
             # Append GPX_TrackPoint to segment:
             gpx_segment.points.append(track_point)
@@ -224,6 +244,8 @@ class Converter:
             col_long='longitude',
             col_time='timestamp',
             col_alt='altitude',
+            col_hr='heart_rate',
+            col_cad='cadence',
         )
 
         # Step 3: Save file
@@ -387,6 +409,8 @@ class StravaConverter(Converter):
                 col_long='longitude',
                 col_time='timestamp',
                 col_alt='altitude',
+                col_hr='heart_rate',
+                col_cad='cadence',
                 **strava_args
             )
 
