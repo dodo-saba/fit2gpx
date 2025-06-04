@@ -494,7 +494,7 @@ def cli():
     )
     parser.add_argument(
         'infile',
-        help='path to the input .FIT file or Strava export directory; '
+        help='path to the input .FIT file, directory of .FIT files, or Strava export directory; '
         "use '-' to read the file from standard input",
     )
     parser.add_argument(
@@ -504,11 +504,14 @@ def cli():
     )
     args = parser.parse_args()
 
-    if os.path.isdir(args.infile):
-        strava_conv = StravaConverter(args.infile, args.outfile)
+    if os.path.isdir(os.path.join(args.infile, 'activities')):
+        strava_conv = StravaConverter(dir_in=args.infile, dir_out=args.outfile)
         strava_conv.unzip_activities()
         strava_conv.add_metadata_to_gpx()
         strava_conv.strava_fit_to_gpx()
+    elif os.path.isdir(args.infile):
+        conv = Converter()
+        conv.fit_to_gpx_bulk(dir_in=args.infile, dir_out=args.outfile)
     else:
         conv = Converter()
         conv.fit_to_gpx(
