@@ -7,10 +7,12 @@ import shutil
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple, Union
 
-import fitdecode
-import lxml.etree as mod_etree
-import gpxpy.gpx
 import pandas as pd
+from math import isnan
+import lxml.etree as mod_etree
+
+import fitdecode
+import gpxpy.gpx
 
 
 # MAIN CONVERTER CLASS
@@ -186,12 +188,20 @@ class Converter:
         # Step 3: Add points from dataframe to GPX track:
         for idx in df_points.index:
             # Create trackpoint:
-            track_point = gpxpy.gpx.GPXTrackPoint(
-                latitude=df_points.loc[idx, col_lat],
-                longitude=df_points.loc[idx, col_long],
-                time=pd.Timestamp(df_points.loc[idx, col_time]) if col_time else None,
-                elevation=df_points.loc[idx, col_alt] if col_alt else None
-            )
+            if isnan(df_points.loc[idx, col_alt]):
+                track_point = gpxpy.gpx.GPXTrackPoint(
+                    latitude=df_points.loc[idx, col_lat],
+                    longitude=df_points.loc[idx, col_long],
+                    time=pd.Timestamp(df_points.loc[idx, col_time]) if col_time else None,
+                    # Do not include elevation if nan
+                )
+            else:
+                track_point = gpxpy.gpx.GPXTrackPoint(
+                    latitude=df_points.loc[idx, col_lat],
+                    longitude=df_points.loc[idx, col_long],
+                    time=pd.Timestamp(df_points.loc[idx, col_time]) if col_time else None,
+                    elevation=df_points.loc[idx, col_alt] if col_alt else None,
+                )
 
             # add GPX extensions for heartrate and cadence
             if col_hr or col_cad:
