@@ -215,7 +215,7 @@ class Converter:
         enhanced_fields = ['altitude', 'speed']
         for field in enhanced_fields:
             if df_points[field].count() == 0 and df_points[f'enhanced_{field}'].count() > 0:
-                df_points[field].fillna(df_points[f'enhanced_{field}'], inplace=True)
+                df_points[field] = df_points[field].fillna(df_points[f'enhanced_{field}'])
 
         # Step 3: Convert pd.DataFrame to GPX
         gpx = self.dataframe_to_gpx(
