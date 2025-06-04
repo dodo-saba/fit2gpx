@@ -1,13 +1,15 @@
 """Classes to convert FIT files to GPX, including tools to process Strava Bulk Export
 """
-import os
+import argparse
 import gzip
+import os
 import shutil
 from datetime import datetime, timedelta
-from typing import Dict, Union, Optional, Tuple
-import pandas as pd
-import gpxpy.gpx
+from typing import Dict, Optional, Tuple, Union
+
 import fitdecode
+import gpxpy.gpx
+import pandas as pd
 
 
 # MAIN CONVERTER CLASS
@@ -98,10 +100,11 @@ class Converter:
         Returns:
             dfs (tuple): df containing data about the laps , df containing data about the individual points.
         """
-        # Check that this is a .FIT file
-        input_extension = os.path.splitext(fname)[1]
-        if input_extension.lower() != '.fit':
-            raise fitdecode.exceptions.FitHeaderError("Input file must be a .FIT file.")
+        if isinstance(fname, str) or hasattr(fname, '__fspath__'):
+            # Check that this is a .FIT file
+            input_extension = os.path.splitext(fname)[1]
+            if input_extension.lower() != '.fit':
+                raise fitdecode.exceptions.FitHeaderError("Input file must be a .FIT file.")
 
         data_points = []
         data_laps = []
@@ -194,14 +197,16 @@ class Converter:
             f_in (str): file path to FIT activity
             f_out (str): file path to save the converted FIT file
         """
-        # Step 0: Validate inputs
-        input_extension = os.path.splitext(f_in)[1]
-        if input_extension != '.fit':
-            raise Exception("Input file must be a .FIT file.")
+        if isinstance(f_in, str) or hasattr(f_in, '__fspath__'):
+            # Step 0: Validate inputs
+            input_extension = os.path.splitext(f_in)[1]
+            if input_extension != '.fit':
+                raise Exception("Input file must be a .FIT file.")
 
-        output_extension = os.path.splitext(f_out)[1]
-        if output_extension != ".gpx":
-            raise TypeError(f"Output file must be a .gpx file.")
+        if isinstance(f_out, str) or hasattr(f_out, '__fspath__'):
+            output_extension = os.path.splitext(f_out)[1]
+            if output_extension != ".gpx":
+                raise TypeError(f"Output file must be a .gpx file.")
 
         # Step 1: Convert FIT to pd.DataFrame
         df_laps, df_points = self.fit_to_dataframes(f_in)
@@ -222,8 +227,12 @@ class Converter:
         )
 
         # Step 3: Save file
-        with open(f_out, 'w') as f:
-            f.write(gpx.to_xml())
+        xml = gpx.to_xml()
+        if hasattr(f_out, 'write'):
+            f_out.write(xml)
+        else:
+            with open(f_out, 'w') as f:
+                f.write(xml)
 
         return gpx
 
@@ -437,3 +446,26 @@ class StravaConverter(Converter):
             # Step 2.4: Print
             if self.status_msg:
                 print(f'{len(gpx_files)} .gpx files have had Strava metadata added.')
+
+
+def cli():
+    parser = argparse.ArgumentParser(
+        prog='fit2gpx',
+        description="Convert a .FIT file to .GPX."
+    )
+    parser.add_argument(
+        'infile',
+        type=argparse.FileType('rb'),
+        help='path to the input .FIT file; '
+        "use '-' to read the file from standard input"
+    )
+    parser.add_argument(
+        'outfile',
+        type=argparse.FileType('wt'),
+        help='path to the output .GPX file; '
+        "use '-' to write the file to standard output"
+    )
+    args = parser.parse_args()
+
+    conv = Converter()
+    conv.fit_to_gpx(f_in=args.infile, f_out=args.outfile)

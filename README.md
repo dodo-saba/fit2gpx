@@ -19,11 +19,11 @@ I decided to create this package after spending a few hours searching for a simp
 
 #### Relevance to Strava
 - Pre-GPDR, you could bulk export all your Strava activities as GPX files.
-- Post-GDPR, you can export an archive of your account. Whilst this includes much more data, activity GPS files are now downloaded in their original file format (eg. GPX or FIT format, some gzipped, some not) and named like 2500155647.gpx, 2500155647.gpx.gz, 2500155647.fit,  and 2500155647.fit.gz. 
+- Post-GDPR, you can export an archive of your account. Whilst this includes much more data, activity GPS files are now downloaded in their original file format (eg. GPX or FIT format, some gzipped, some not) and named like 2500155647.gpx, 2500155647.gpx.gz, 2500155647.fit,  and 2500155647.fit.gz.
 - [How to bulk export you Strava Data](https://support.strava.com/hc/en-us/articles/216918437-Exporting-your-Data-and-Bulk-Export#Bulk)
 
 # Overview
-The fit2gpx module provides two converter classes: 
+The fit2gpx module provides two converter classes:
 - Converter: used to convert a single or multiple FIT files to pandas dataframes or GPX files
 - StravaConverter: used to fix all the Strava Bulk Export problems in three steps:
     1. Unzip GPX and FIT files
@@ -45,7 +45,7 @@ df_lap, df_point = conv.fit_to_dataframes(fname='3323369944.fit')
 - df_points: information per track point: longitude, latitude, altitude, timestamp, heart rate, cadence, speed, power, temperature
   - Note the 'enhanced_speed' and 'enhanced_altitude' are also extracted. Where overlap exists with their default counterparts, values are identical. However, the default or enhanced speed/altitude fields may be empty  depending on the device used to record ([detailed information](https://pkg.go.dev/github.com/tormoder/fit#RecordMsg)).
 
-    
+
 # Use Case 2: FIT to GPX
 Import module and create converter object
 ```python
@@ -70,8 +70,8 @@ from fit2gpx import StravaConverter
 
 DIR_STRAVA = 'C:/Users/dorian-saba/Documents/Strava/'
 
-# Step 1: Create StravaConverter object 
-# - Note: the dir_in must be the path to the central unzipped Strava bulk export folder 
+# Step 1: Create StravaConverter object
+# - Note: the dir_in must be the path to the central unzipped Strava bulk export folder
 # - Note: You can specify the dir_out if you wish. By default it is set to 'activities_gpx', which will be created in main Strava folder specified.
 
 strava_conv = StravaConverter(
@@ -92,6 +92,34 @@ strava_conv.strava_fit_to_gpx()
 #### pandas
 [pandas](https://github.com/pandas-dev/pandas) is a Python package that provides fast, flexible, and expressive data structures designed to make working with "relational" or "labeled" data both easy and intuitive.
 #### gpxpy
-[gpxpy](https://github.com/tkrajina/gpxpy) is a simple Python library for parsing and manipulating GPX files. It can parse and generate GPX 1.0 and 1.1 files. The generated file will always be a valid XML document, but it may not be (strictly speaking) a valid GPX document. 
+[gpxpy](https://github.com/tkrajina/gpxpy) is a simple Python library for parsing and manipulating GPX files. It can parse and generate GPX 1.0 and 1.1 files. The generated file will always be a valid XML document, but it may not be (strictly speaking) a valid GPX document.
 #### fitdecode
 [fitdecode](https://github.com/polyvertex/fitdecode) is a rewrite of the [fitparse](https://github.com/dtcooper/python-fitparse) module allowing to parse ANT/GARMIN FIT files.
+
+# Command line interface
+
+You can install this package using pip:
+
+```shell
+pip install --user --upgrade .
+```
+
+And then you can run the `fit2gpx` command to convert a FIT file to GPX:
+
+```shell
+fit2gpx 3323369944.fit 3323369944.gpx
+```
+
+You can also read the FIT file from standard input and/or write the GPX file to
+standard output:
+
+```shell
+fit2gpx - 3323369944.gpx < 3323369944.fit
+fit2gpx 3323369944.fit - > 3323369944.gpx
+```
+
+To see the help, run:
+
+```shell
+fit2gpx -h
+```
