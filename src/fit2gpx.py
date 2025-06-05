@@ -87,8 +87,19 @@ class Converter:
             # Frame lat or long is None. Ignore frame
             return None
         else:
-            data['latitude'] = frame.get_value('position_lat') / ((2 ** 32) / 360)
-            data['longitude'] = frame.get_value('position_long') / ((2 ** 32) / 360)
+            position_lat = frame.get_value('position_lat')
+            if position_lat is not None:
+                data['latitude'] = position_lat / ((2 ** 32) / 360)
+            else:
+                data['latitude'] = 0.0
+                pass
+            position_long = frame.get_value('position_long')
+            if position_lat is not None:
+                data['longitude'] = frame.get_value('position_long') / ((2 ** 32) / 360)
+            else:
+                data['longitude'] = 0.0
+                pass
+            
 
         # Step 2: Extract all other fields
         for field in self._colnames_points[3:]:
